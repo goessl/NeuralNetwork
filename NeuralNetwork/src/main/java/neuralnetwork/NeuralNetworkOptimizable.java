@@ -37,43 +37,29 @@ import optimization.Optimizable;
 
 
 /**
- * Wrapper class for NeuralNetworkWithBias to be optimizable.
- * Wraps & unwraps the weight & bias matricies to parameter arrays and
- * parameter arrays to the weight & bias matricies.
+ * Wrapper class for NeuralNetwork to be optimizable.
+ * Wraps & unwraps the weight matricies to parameter arrays and parameter
+ * arrays to the weight matricies.
  * 
  * @author Sebastian Gössl
  * @version 1.0 3.3.2019
  */
-public class NeuralNetworkWithBiasOptimizable implements Optimizable<double[]> {
+public class NeuralNetworkOptimizable implements Optimizable<double[]> {
   
   /**
-   * NeuralNetworkWithBias to wrap.
+   * NeuralNetwork to wrap.
    */
-  private final NeuralNetworkWithBias net;
-  /**
-   * References to the weight & bias matricies in alternating order.
-   * weights[0], biases[0], weights[1], ...
-   */
-  private final Matrix[] matricies;
+  private final NeuralNetwork net;
   
   
   
   /**
-   * Constructs a new NeuralNetworkWithBiasOptimizable with the given
-   * NeuralNetworkWithBias.
+   * Constructs a new NeuralNetworkOptimizable with the given NeuralNetwork.
    * 
-   * @param net NeuralNetworkWithBias to wrap
+   * @param net NeuralNetwork to wrap
    */
-  public NeuralNetworkWithBiasOptimizable(NeuralNetworkWithBias net) {
+  public NeuralNetworkOptimizable(NeuralNetwork net) {
     this.net = net;
-    
-    
-    matricies = new Matrix[2 * net.getNumberOfLayers()];
-    
-    for(int i=0; i<net.getNumberOfLayers(); i++) {
-      matricies[2*i] = net.getWeights(i);
-      matricies[2*i + 1] = net.getBiases(i);
-    }
   }
   
   
@@ -97,7 +83,7 @@ public class NeuralNetworkWithBiasOptimizable implements Optimizable<double[]> {
   
   @Override
   public double[] getParameters() {
-    return matriciesToArray(matricies);
+    return matriciesToArray(net.getWeights());
   }
   
   @Override
@@ -105,8 +91,8 @@ public class NeuralNetworkWithBiasOptimizable implements Optimizable<double[]> {
     final PrimitiveIterator.OfDouble iterator =
             Arrays.stream(params).iterator();
     
-    for(Matrix matrix : matricies) {
-      matrix.set(() -> (iterator.nextDouble()));
+    for(Matrix weight : net.getWeights()) {
+      weight.set(iterator::nextDouble);
     }
   }
   

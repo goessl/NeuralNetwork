@@ -58,7 +58,7 @@ public enum ActivationFunction {
     //Identity
     (x) -> (x),
     //Tanh
-    (x) -> (Math.tanh(x)),
+          Math::tanh,
     //Sigmoid
     (x) -> (1 / (1 + Math.exp(-x))),
     //ReLU
