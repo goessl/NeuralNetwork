@@ -42,15 +42,12 @@ public enum ActivationFunction {
    * Enums.
    */
   IDENTITY, TANH, SIGMOID, RELU, SOFTPLUS, RELU_LEAKY;
-  
-  
-  
+
   /**
    * Leaky ReLU leakage
    */
   private static final double RELU_LEAKY_LEAKAGE = 0.01;
-  
-  
+
   /**
    * Functions.
    */
@@ -118,9 +115,7 @@ public enum ActivationFunction {
     "SoftPlus",
     "Leaky rectified linear unit"
   };
-  
-  
-  
+
   /**
    * Returns the function as DoubleUnaryOperator.
    * 
@@ -138,8 +133,6 @@ public enum ActivationFunction {
   public DoubleUnaryOperator getPrime() {
     return primes[ordinal()];
   }
-  
-  
   
   @Override
   public String toString() {

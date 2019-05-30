@@ -1,1 +1,1 @@
-include ':NeuralNetwork', ':Matrix', ':Optimization'
+include ':NeuralNetwork', ':Matrix', ':Optimization', ':MachineLearning'

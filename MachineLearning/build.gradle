@@ -1,0 +1,10 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(path: ':Matrix')
+    implementation project(path: ':NeuralNetwork')
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"
