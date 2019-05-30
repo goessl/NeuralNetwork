@@ -22,25 +22,51 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-package neuralnetwork;
 
-import optimization.Optimizer;
+
+package optimization;
+
+
 
 /**
- * Optimizer used to optimize NeuralNetworks.
+ * Interface used for mathematical optimizable classes.
  * 
  * @author Sebastian Gössl
  * @version 1.0 3.3.2019
+ * @param <T> Input & output type
  */
-public abstract class NeuralNetworkOptimizer extends Optimizer<double[]> {
+public interface Optimizable<T> {
   
   /**
-   * Constructs a new NeuralNetworkOptimizer to optimize the given
-   * NeuralNetwork.
+   * Returns all parameters arranged to an array.
    * 
-   * @param net NeuralNetwork to optimize
+   * @return parameters arranged to an array
    */
-  public NeuralNetworkOptimizer(NeuralNetwork net) {
-    super(new NeuralNetworkOptimizable(net));
-  }
+  double[] getParameters();
+  
+  /**
+   * Replaces all parameters with the given ones.
+   * 
+   * @param params new parameters
+   */
+  void setParameters(double[] params);
+  
+  
+  /**
+   * Returns the error of this objects outputs compared to the given outputs.
+   * 
+   * @param input input
+   * @param output output
+   * @return error of this objects outputs compared to the given outputs
+   */
+  double cost(T[] input, T[] output);
+  
+  /**
+   * Returns the derivative of the cost with respect to every parameter.
+   * 
+   * @param input input
+   * @param output wanted output
+   * @return derivative of the cost with respect to every parameter
+   */
+  double[] costPrime(T[] input, T[] output);
 }

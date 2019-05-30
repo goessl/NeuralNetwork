@@ -685,8 +685,7 @@ public class Network {
 		double lastCost = cost(input, output);
 
 		for (int iterations = 0;
-			 keepTraining(iterations, learningRate, lastCost)
-					 && learningRate > 0;
+			 keepTraining(iterations, learningRate, lastCost) && learningRate > 0;
 			 iterations++) {
 			final Matrix[] lastWeights = copyWeights();
 
@@ -793,9 +792,9 @@ public class Network {
 		final Network net = new Network(
 				2,                                    //2 inputs
 				new int[]{3, 1},                      //2 layers with 3 & 1 neurons
-//				new Network.ActivationFunction[]{
-//						Network.ActivationFunction.NONE,    //both layers with ...
-//						Network.ActivationFunction.NONE});  //... no activation function
+//				new this.ActivationFunction[]{
+//						this.ActivationFunction.NONE,    //both layers with ...
+//						this.ActivationFunction.NONE});  //... no activation function
 				new ActivationFunction[]{
 						ActivationFunction.IDENTITY,    //both layers with ...
 						ActivationFunction.IDENTITY});  //... no activation function

@@ -28,8 +28,6 @@ package neuralnetwork;
 
 import java.util.function.DoubleUnaryOperator;
 
-
-
 /**
  * Common activation functions & their derivatives used in neural networks.
  * 
