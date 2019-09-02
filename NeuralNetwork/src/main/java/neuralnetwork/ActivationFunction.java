@@ -28,8 +28,6 @@ package neuralnetwork;
 
 import java.util.function.DoubleUnaryOperator;
 
-
-
 /**
  * Common activation functions & their derivatives used in neural networks.
  * 
@@ -42,15 +40,12 @@ public enum ActivationFunction {
    * Enums.
    */
   IDENTITY, TANH, SIGMOID, RELU, SOFTPLUS, RELU_LEAKY;
-  
-  
-  
+
   /**
    * Leaky ReLU leakage
    */
   private static final double RELU_LEAKY_LEAKAGE = 0.01;
-  
-  
+
   /**
    * Functions.
    */
@@ -58,7 +53,7 @@ public enum ActivationFunction {
     //Identity
     (x) -> (x),
     //Tanh
-    (x) -> (Math.tanh(x)),
+          Math::tanh,
     //Sigmoid
     (x) -> (1 / (1 + Math.exp(-x))),
     //ReLU
@@ -118,9 +113,7 @@ public enum ActivationFunction {
     "SoftPlus",
     "Leaky rectified linear unit"
   };
-  
-  
-  
+
   /**
    * Returns the function as DoubleUnaryOperator.
    * 
@@ -138,8 +131,6 @@ public enum ActivationFunction {
   public DoubleUnaryOperator getPrime() {
     return primes[ordinal()];
   }
-  
-  
   
   @Override
   public String toString() {

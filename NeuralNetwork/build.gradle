@@ -1,0 +1,10 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(path: ':Optimization')
+    implementation project(path: ':Matrix')
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"

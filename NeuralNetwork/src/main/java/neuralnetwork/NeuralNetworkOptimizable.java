@@ -22,8 +22,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-
-
 package neuralnetwork;
 
 import java.util.ArrayList;
@@ -33,8 +31,6 @@ import java.util.List;
 import java.util.PrimitiveIterator;
 import java.util.function.Consumer;
 import optimization.Optimizable;
-
-
 
 /**
  * Wrapper class for NeuralNetwork to be optimizable.
@@ -50,8 +46,6 @@ public class NeuralNetworkOptimizable implements Optimizable<double[]> {
    * NeuralNetwork to wrap.
    */
   private final NeuralNetwork net;
-  
-  
   
   /**
    * Constructs a new NeuralNetworkOptimizable with the given NeuralNetwork.
@@ -78,9 +72,7 @@ public class NeuralNetworkOptimizable implements Optimizable<double[]> {
     
     return list.stream().mapToDouble(Double::doubleValue).toArray();
   }
-  
-  
-  
+
   @Override
   public double[] getParameters() {
     return matriciesToArray(net.getWeights());
@@ -92,11 +84,10 @@ public class NeuralNetworkOptimizable implements Optimizable<double[]> {
             Arrays.stream(params).iterator();
     
     for(Matrix weight : net.getWeights()) {
-      weight.set(() -> (iterator.nextDouble()));
+      weight.set(iterator::nextDouble);
     }
   }
-  
-  
+
   @Override
   public double cost(double[][] input, double[][] output) {
     return net.cost(new Matrix(input), new Matrix(output));

@@ -38,14 +38,14 @@ import java.util.function.DoubleUnaryOperator;
  * (Matricies and layers are zero indexed!)
  * 
  * Input & output sets are stored in matricies in which every row represents
- * an dataset and every column gets feed into an node (e.g. element[1][2] is a
+ * anndataset and every column gets feed into an node (e.g. element[1][2] is a
  * parameter of a dataset with index [1] and gets feed into the node with
  * index [2])
  * 
  * The network is build up from an array of layers. Every layer consists of
- * the weights leading to it from the previous layer, its nodes (neurons) and
- * its activation function (and derivative for backpropagation = optimization
- * = training) that gets applied to the values in every node.
+ * the weights leading to it from the previous layer, its biases, its nodes
+ * (neurons) and its activation function (and derivative forbackpropagation =
+ * optimization = training) that gets applied to the values in every node.
  * The first layer (index: 0) is the first hidden layer.
  * The last layer (index: layers.lenght-1) is the output layer.
  * 
@@ -54,10 +54,13 @@ import java.util.function.DoubleUnaryOperator;
  * previous node and the column the node it leads into. (e.g. weight[2][1] of
  * layer[3] connects the node[2] of layer[2] with node[1] of layer[3])
  * 
+ * The biases of every layer are row vectors where every column is the bias
+ * for one node.
+ * 
  * @author Sebastian Gössl
  * @version 1.0 21.1.2019
  */
-public class NeuralNetwork {
+public class NeuralNetworkWithBias {
   
   /**
    * Layers of the network.
@@ -71,19 +74,21 @@ public class NeuralNetwork {
    * 
    * @param other network to copy
    */
-  public NeuralNetwork(NeuralNetwork other) {
+  public NeuralNetworkWithBias(NeuralNetworkWithBias other) {
     layers = new Layer[other.getNumberOfLayers()];
     
     layers[0] = new Layer(other.getNumberOfInputs(), other.getLayerSize(0),
             other.getActivationFunction(0),
             other.getActivationFunctionPrime(0));
     setWeights(0, other.getWeights(0));
+    setBiases(0, other.getBiases(0));
     
     for(int i=1; i<layers.length; i++) {
       layers[i] = new Layer(other.getLayerSize(i-1), other.getLayerSize(i),
               other.getActivationFunction(i),
               other.getActivationFunctionPrime(i));
       setWeights(i, other.getWeights(i));
+      setBiases(i, other.getBiases(i));
     }
   }
   
@@ -96,7 +101,7 @@ public class NeuralNetwork {
    * @param activationFunctionPrimes derivatives of the activation functions
    * in the hidden layers
    */
-  public NeuralNetwork(int numberOfInputs, int[] layerSizes,
+  public NeuralNetworkWithBias(int numberOfInputs, int[] layerSizes,
           DoubleUnaryOperator[] activationFunctions,
           DoubleUnaryOperator[] activationFunctionPrimes) {
     
@@ -198,6 +203,52 @@ public class NeuralNetwork {
   }
   
   /**
+   * Returns the biases of the specified layer.
+   * 
+   * @param layer index of the layer
+   * @return biases of the specified layer
+   */
+  public Matrix getBiases(int layer) {
+    return layers[layer].biases;
+  }
+  
+  /**
+   * Returns all biases in an array.
+   * 
+   * @return all biases in an array
+   */
+  public Matrix[] getBiases() {
+    final Matrix[] biases = new Matrix[layers.length];
+    
+    for(int i=0; i<biases.length; i++) {
+      biases[i] = layers[i].biases;
+    }
+    
+    return biases;
+  }
+  
+  /**
+   * Replaces the biases of the specified layer with the given biases.
+   * 
+   * @param layer index of the layer
+   * @param biases biases to replace the current biases with
+   */
+  public void setBiases(int layer, Matrix biases) {
+    layers[layer].biases = biases;
+  }
+  
+  /**
+   * Replaces all weights with the given weights.
+   * 
+   * @param biases biases to replace the current biases with
+   */
+  public void setBiases(Matrix[] biases) {
+    for(int i=0; i<layers.length; i++) {
+      layers[i].biases = biases[i];
+    }
+  }
+  
+  /**
    * Returns the activation function of the specified layer.
    * 
    * @param layer index of the layer
@@ -246,6 +297,7 @@ public class NeuralNetwork {
       final double average =
               (layer.getNumberOfInputs() + layer.getNumberOfOutputs()) / 2;
       layer.weights.set(() -> (rand.nextGaussian() / Math.sqrt(average)));
+      layer.biases.set(rand::nextGaussian);
     }
   }
   
@@ -255,8 +307,8 @@ public class NeuralNetwork {
    * a maximum of <code>Double.MAX_VALUE / 2</code> while also eliminating
    * NaNs.
    */
-  public void keepWeightsInBounds() {
-    keepWeightsInBounds(-Double.MAX_VALUE / 2, Double.MAX_VALUE / 2);
+  public void keepWeightsAndBiasesInBounds() {
+    keepWeightsAndBiasesInBounds(-Double.MAX_VALUE / 2, Double.MAX_VALUE / 2);
   }
   
   /**
@@ -266,19 +318,22 @@ public class NeuralNetwork {
    * @param minimum minimum value for the weights
    * @param maximum maximum value for the weights
    */
-  public void keepWeightsInBounds(double minimum, double maximum) {
+  public void keepWeightsAndBiasesInBounds(double minimum, double maximum) {
+    final DoubleUnaryOperator op = (x) -> {
+      if(Double.isNaN(x)) {
+        return (minimum + maximum) / 2;
+      } else if(x < minimum) {
+        return minimum;
+      } else if(x > maximum) {
+        return maximum;
+      }
+      
+      return x;
+    };
+    
     for(Layer layer : layers) {
-      layer.weights.forEach((x) -> {
-        if(Double.isNaN(x)) {
-          return (minimum + maximum) / 2;
-        } else if(x < minimum) {
-          return minimum;
-        } else if(x > maximum) {
-          return maximum;
-        }
-        
-        return x;
-      });
+      layer.weights.forEach(op);
+      layer.biases.forEach(op);
     }
   }
   
@@ -310,11 +365,10 @@ public class NeuralNetwork {
    */
   public double cost(Matrix input, Matrix output) {
     final Matrix difference = output.subtract(forward(input));
-    final Matrix squaredDifference =
-            difference.multiplyElementwise(difference);
+    final Matrix squaredError = difference.multiplyElementwise(difference);
     
     double cost = 0;
-    for(double error : squaredDifference) {
+    for(double error : squaredError) {
       cost += error;
     }
     cost /= 2;
@@ -324,7 +378,8 @@ public class NeuralNetwork {
   }
   
   /**
-   * Returns the derivative of the cost with respect to every weight.
+   * Returns the derivative of the cost with respect to every weight & bias in
+   * alternating order (weights[0], biases[0], weights[1], biases[1],...).
    * 
    * @param input input for the network
    * @param output wanted output of the network
@@ -332,7 +387,7 @@ public class NeuralNetwork {
    */
   public Matrix[] costPrime(Matrix input, Matrix output) {
     final Matrix yHat = forward(input);
-    final Matrix[] dJdW = new Matrix[layers.length];
+    final Matrix[] dJ = new Matrix[2*layers.length];
     
     
     Matrix delta = yHat
@@ -341,22 +396,25 @@ public class NeuralNetwork {
                     .apply(layers[layers.length-1].activationFunctionPrime));
     
     for(int i=layers.length-1; i>0; i--) {
-      dJdW[i] = layers[i].backpropagateToWeights(delta, layers[i-1]);
+      dJ[2*i] = layers[i].backpropagateToWeights(delta, layers[i-1]);
+      dJ[2*i + 1] = layers[i].backpropagateToBiases(delta);
+      
       delta = layers[i-1].backpropagate(delta, layers[i]);
     }
     
-    dJdW[0] = input.transpose().multiply(delta);
+    dJ[0] = input.transpose().multiply(delta);
+    dJ[1] = layers[0].backpropagateToBiases(delta);
     
     
-    return dJdW;
+    return dJ;
   }
   
   
   
   /**
    * Helper class which represents a single layer of the neural network.
-   * It consists of its nodes (neurons) and the weights (synapses) leading to
-   * it from the previous layer.
+   * It consists of its nodes (neurons), biases and the weights (synapses)
+   * leading to it from the previous layer.
    */
   private class Layer {
     /**
@@ -365,12 +423,12 @@ public class NeuralNetwork {
     private final DoubleUnaryOperator activationFunction,
             activationFunctionPrime;
     /**
-     * Weights leading into this layer.
+     * Weights leading into this layer and biases.
      */
-    private Matrix weights;
+    private Matrix weights, biases;
     /**
      * Activation values needed for backpropagation.
-     * z = weighted and added inputs from the previous layer
+     * z = weighted, added and biased inputs from the previous layer
      * a = z with applied activation function
      */
     private Matrix z, a;
@@ -393,6 +451,7 @@ public class NeuralNetwork {
       this.activationFunctionPrime = activationFunctionPrime;
       
       weights = new Matrix(inputs, outputs);
+      biases = new Matrix(1, outputs);
     }
     
     
@@ -424,7 +483,7 @@ public class NeuralNetwork {
      * @return output of the layer
      */
     public Matrix forward(Matrix input) {
-      z = input.multiply(weights);
+      z = input.multiply(weights).applyDifSize(biases, Double::sum);
       a = z.apply(activationFunction);
       
       return a;
@@ -437,7 +496,7 @@ public class NeuralNetwork {
      * 
      * @param deltaNext derivative with respect to every node of this layer
      * @param next next layer
-     * @return 
+     * @return derivative with respect to every node of the previous layer
      */
     public Matrix backpropagate(Matrix deltaNext, Layer next) {
       return deltaNext
@@ -456,6 +515,27 @@ public class NeuralNetwork {
      */
     public Matrix backpropagateToWeights(Matrix delta, Layer previous) {
       return previous.a.transpose().multiply(delta);
+    }
+    
+    /**
+     * Backpropagates the given matrix which represents a derivative with
+     * respect to every node of this layer to a the derivative with respect to
+     * every bias of this layer.
+     * 
+     * @param delta derivative with respect to every node of this layer
+     * @return derivative with respect to every bias of this layer
+     */
+    public Matrix backpropagateToBiases(Matrix delta) {
+      final Matrix matrix = new Matrix(biases.getHeight(), biases.getWidth(),
+              (y, x) -> {
+                double sum = 0;
+                for(int i=0; i<delta.getHeight(); i++) {
+                  sum += delta.get(i, x);
+                }
+                return sum;
+              });
+      
+      return matrix;
     }
   }
 }

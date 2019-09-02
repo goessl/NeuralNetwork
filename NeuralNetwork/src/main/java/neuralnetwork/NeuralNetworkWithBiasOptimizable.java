@@ -56,8 +56,6 @@ public class NeuralNetworkWithBiasOptimizable implements Optimizable<double[]> {
    */
   private final Matrix[] matricies;
   
-  
-  
   /**
    * Constructs a new NeuralNetworkWithBiasOptimizable with the given
    * NeuralNetworkWithBias.
@@ -66,8 +64,7 @@ public class NeuralNetworkWithBiasOptimizable implements Optimizable<double[]> {
    */
   public NeuralNetworkWithBiasOptimizable(NeuralNetworkWithBias net) {
     this.net = net;
-    
-    
+
     matricies = new Matrix[2 * net.getNumberOfLayers()];
     
     for(int i=0; i<net.getNumberOfLayers(); i++) {
@@ -106,7 +103,7 @@ public class NeuralNetworkWithBiasOptimizable implements Optimizable<double[]> {
             Arrays.stream(params).iterator();
     
     for(Matrix matrix : matricies) {
-      matrix.set(() -> (iterator.nextDouble()));
+      matrix.set(iterator::nextDouble);
     }
   }
   
