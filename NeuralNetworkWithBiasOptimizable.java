@@ -42,83 +42,84 @@ import optimization.Optimizable;
  * parameter arrays to the weight & bias matricies.
  * 
  * @author Sebastian Gössl
- * @version 1.0 3.3.2019
+ * @version 1.1 12.9.2019
  */
-public class NeuralNetworkWithBiasOptimizable implements Optimizable<double[]> {
-  
-  /**
-   * NeuralNetworkWithBias to wrap.
-   */
-  private final NeuralNetworkWithBias net;
-  /**
-   * References to the weight & bias matricies in alternating order.
-   * weights[0], biases[0], weights[1], ...
-   */
-  private final Matrix[] matricies;
-  
-  
-  
-  /**
-   * Constructs a new NeuralNetworkWithBiasOptimizable with the given
-   * NeuralNetworkWithBias.
-   * 
-   * @param net NeuralNetworkWithBias to wrap
-   */
-  public NeuralNetworkWithBiasOptimizable(NeuralNetworkWithBias net) {
-    this.net = net;
+public class NeuralNetworkWithBiasOptimizable
+        implements Optimizable<double[]> {
+    
+    /**
+     * NeuralNetworkWithBias to wrap.
+     */
+    private final NeuralNetworkWithBias net;
+    /**
+     * References to the weight & bias matricies in alternating order.
+     * weights[0], biases[0], weights[1], ...
+     */
+    private final Matrix[] matricies;
     
     
-    matricies = new Matrix[2 * net.getNumberOfLayers()];
     
-    for(int i=0; i<net.getNumberOfLayers(); i++) {
-      matricies[2*i] = net.getWeights(i);
-      matricies[2*i + 1] = net.getBiases(i);
-    }
-  }
-  
-  
-  
-  /**
-   * Unwraps the elements of a matrix array to a primitive double array.
-   * 
-   * @param matricies matricies to be unwrapped
-   * @return elements of the matricies in an primitive double array
-   */
-  private double[] matriciesToArray(Matrix[] matricies) {
-    final List<Double> list = new ArrayList<>();
-    for(Matrix matrix : matricies) {
-      matrix.forEach((Consumer<Double>)list::add);
+    /**
+     * Constructs a new NeuralNetworkWithBiasOptimizable with the given
+     * NeuralNetworkWithBias.
+     * 
+     * @param net NeuralNetworkWithBias to wrap
+     */
+    public NeuralNetworkWithBiasOptimizable(NeuralNetworkWithBias net) {
+        this.net = net;
+        
+        
+        matricies = new Matrix[2 * net.getNumberOfLayers()];
+        
+        for(int i=0; i<net.getNumberOfLayers(); i++) {
+            matricies[2*i] = net.getWeights(i);
+            matricies[2*i + 1] = net.getBiases(i);
+      } 
     }
     
-    return list.stream().mapToDouble(Double::doubleValue).toArray();
-  }
-  
-  
-  
-  @Override
-  public double[] getParameters() {
-    return matriciesToArray(matricies);
-  }
-  
-  @Override
-  public void setParameters(double[] params) {
-    final PrimitiveIterator.OfDouble iterator =
-            Arrays.stream(params).iterator();
     
-    for(Matrix matrix : matricies) {
-      matrix.set(() -> (iterator.nextDouble()));
+    
+    /**
+     * Unwraps the elements of a matrix array to a primitive double array.
+     * 
+     * @param matricies matricies to be unwrapped
+     * @return elements of the matricies in an primitive double array
+     */
+    private double[] matriciesToArray(Matrix[] matricies) {
+        final List<Double> list = new ArrayList<>();
+        for(Matrix matrix : matricies) {
+            matrix.forEach((Consumer<Double>)list::add);
+        }
+        
+        return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
-  }
-  
-  
-  @Override
-  public double cost(double[][] input, double[][] output) {
-    return net.cost(new Matrix(input), new Matrix(output));
-  }
-  
-  @Override
-  public double[] costPrime(double[][] input, double[][] output) {
-    return matriciesToArray(
-            net.costPrime(new Matrix(input), new Matrix(output)));
-  }
+    
+    
+    
+    @Override
+    public double[] getParameters() {
+        return matriciesToArray(matricies);
+    }
+    
+    @Override
+    public void setParameters(double[] params) {
+        final PrimitiveIterator.OfDouble iterator =
+                Arrays.stream(params).iterator();
+        
+        for(Matrix matrix : matricies) {
+            matrix.set(() -> (iterator.nextDouble()));
+        }
+    }
+    
+    
+    @Override
+    public double cost(double[][] input, double[][] output) {
+        return net.cost(new Matrix(input), new Matrix(output));
+    }
+    
+    @Override
+    public double[] costPrime(double[][] input, double[][] output) {
+        return matriciesToArray(
+                net.costPrime(new Matrix(input), new Matrix(output)));
+    }
 }

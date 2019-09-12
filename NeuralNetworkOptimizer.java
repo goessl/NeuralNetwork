@@ -34,17 +34,17 @@ import optimization.Optimizer;
  * Optimizer used to optimize NeuralNetworks.
  * 
  * @author Sebastian Gössl
- * @version 1.0 3.3.2019
+ * @version 1.1 12.9.2019
  */
 public abstract class NeuralNetworkOptimizer extends Optimizer<double[]> {
-  
-  /**
-   * Constructs a new NeuralNetworkOptimizer to optimize the given
-   * NeuralNetwork.
-   * 
-   * @param net NeuralNetwork to optimize
-   */
-  public NeuralNetworkOptimizer(NeuralNetwork net) {
-    super(new NeuralNetworkOptimizable(net));
-  }
+    
+    /**
+     * Constructs a new NeuralNetworkOptimizer to optimize the given
+     * NeuralNetwork.
+     * 
+     * @param net NeuralNetwork to optimize
+     */
+    public NeuralNetworkOptimizer(NeuralNetwork net) {
+        super(new NeuralNetworkOptimizable(net));
+    }
 }

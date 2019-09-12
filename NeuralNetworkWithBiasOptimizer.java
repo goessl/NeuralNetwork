@@ -34,17 +34,18 @@ import optimization.Optimizer;
  * Optimizer used to optimize NeuralNetworkWithBiases.
  * 
  * @author Sebastian Gössl
- * @version 1.0 3.3.2019
+ * @version 1.1 12.9.2019
  */
-public abstract class NeuralNetworkWithBiasOptimizer extends Optimizer<double[]> {
-  
-  /**
-   * Constructs a new NeuralNetworkWithBiasOptimizer to optimize the given
-   * NeuralNetworkWithBiases.
-   * 
-   * @param net NeuralNetworkWithBias to optimize
-   */
-  public NeuralNetworkWithBiasOptimizer(NeuralNetworkWithBias net) {
-    super(new NeuralNetworkWithBiasOptimizable(net));
-  }
+public abstract class NeuralNetworkWithBiasOptimizer
+        extends Optimizer<double[]> {
+    
+    /**
+     * Constructs a new NeuralNetworkWithBiasOptimizer to optimize the given
+     * NeuralNetworkWithBiases.
+     * 
+     * @param net NeuralNetworkWithBias to optimize
+     */
+    public NeuralNetworkWithBiasOptimizer(NeuralNetworkWithBias net) {
+        super(new NeuralNetworkWithBiasOptimizable(net));
+    }
 }

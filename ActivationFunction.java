@@ -34,115 +34,115 @@ import java.util.function.DoubleUnaryOperator;
  * Common activation functions & their derivatives used in neural networks.
  * 
  * @author Sebastian Gössl
- * @version 1.0 3.3.2019
+ * @version 1.1 12.9.2019
  */
 public enum ActivationFunction {
-  
-  /**
-   * Enums.
-   */
-  IDENTITY, TANH, SIGMOID, RELU, SOFTPLUS, RELU_LEAKY;
-  
-  
-  
-  /**
-   * Leaky ReLU leakage
-   */
-  private static final double RELU_LEAKY_LEAKAGE = 0.01;
-  
-  
-  /**
-   * Functions.
-   */
-  private static DoubleUnaryOperator[] foos = new DoubleUnaryOperator[] {
-    //Identity
-    (x) -> (x),
-    //Tanh
-    (x) -> (Math.tanh(x)),
-    //Sigmoid
-    (x) -> (1 / (1 + Math.exp(-x))),
-    //ReLU
-    (x) -> {
-      if(x >= 0) {
-        return x;
-      } else {
-        return 0.0;
-      }},
-    //SoftPlus
-    (x) -> (Math.log(1 + Math.exp(x))),
-    //Leaky ReLU
-    (x) -> {
-      if(x >= 0) {
-        return x;
-      } else {
-        return RELU_LEAKY_LEAKAGE * x;
-      }}
-  };
-  
-  /**
-   * Derivatives.
-   */
-  private static DoubleUnaryOperator[] primes = new DoubleUnaryOperator[] {
-    //Identity
-    (x) -> (1),
-    //Tanh
-    (x) -> (1 - Math.tanh(x) * Math.tanh(x)),
-    //Sigmoid
-    (x) -> (Math.exp(-x) / ((1 + Math.exp(-x)) * (1 + Math.exp(-x)))),
-    //ReLU
-    (x) -> {
-      if(x >= 0) {
-        return 1.0;
-      } else {
-        return 0.0;
-      }},
-    //Softplus
-    (x) -> (1 / (1 + Math.exp(-x))),
-    //Leaky ReLU
-    (x) -> {
-      if(x >= 0) {
-        return  1.0;
-      } else {
-        return RELU_LEAKY_LEAKAGE;
-      }}
-  };
-  
-  /**
-   * Names.
-   */
-  private static final String[] names = {
-    "Identity",
-    "Hyperbolic tangent",
-    "Sigmoid",
-    "Rectified linear unit",
-    "SoftPlus",
-    "Leaky rectified linear unit"
-  };
-  
-  
-  
-  /**
-   * Returns the function as DoubleUnaryOperator.
-   * 
-   * @return function as DoubleUnaryOperator;
-   */
-  public DoubleUnaryOperator get() {
-    return foos[ordinal()];
-  }
-  
-  /**
-   * Returns the derivative as DoubleUnaryOperator.
-   * 
-   * @return derivative as DoubleUnaryOperator;
-   */
-  public DoubleUnaryOperator getPrime() {
-    return primes[ordinal()];
-  }
-  
-  
-  
-  @Override
-  public String toString() {
-    return names[ordinal()];
-  }
+    
+    /**
+     * Enums.
+     */
+    IDENTITY, TANH, SIGMOID, RELU, SOFTPLUS, RELU_LEAKY;
+    
+    
+    
+    /**
+     * Leaky ReLU leakage
+     */
+    private static final double RELU_LEAKY_LEAKAGE = 0.01;
+    
+    
+    /**
+     * Functions.
+     */
+    private static DoubleUnaryOperator[] foos = new DoubleUnaryOperator[] {
+        //Identity
+        (x) -> (x),
+        //Tanh
+        (x) -> (Math.tanh(x)),
+        //Sigmoid
+        (x) -> (1 / (1 + Math.exp(-x))),
+        //ReLU
+        (x) -> {
+            if(x >= 0) {
+                return x;
+            } else {
+                return 0.0;
+            }},
+        //SoftPlus
+        (x) -> (Math.log(1 + Math.exp(x))),
+        //Leaky ReLU
+        (x) -> {
+            if(x >= 0) {
+                return x;
+            } else {
+                return RELU_LEAKY_LEAKAGE * x;
+            }}
+    };
+    
+    /**
+     * Derivatives.
+     */
+    private static DoubleUnaryOperator[] primes = new DoubleUnaryOperator[] {
+        //Identity
+        (x) -> (1),
+        //Tanh
+        (x) -> (1 - Math.tanh(x) * Math.tanh(x)),
+        //Sigmoid
+        (x) -> (Math.exp(-x) / ((1 + Math.exp(-x)) * (1 + Math.exp(-x)))),
+        //ReLU
+        (x) -> {
+            if(x >= 0) {
+                return 1.0;
+            } else {
+                return 0.0;
+            }},
+        //Softplus
+        (x) -> (1 / (1 + Math.exp(-x))),
+        //Leaky ReLU
+        (x) -> {
+            if(x >= 0) {
+                return  1.0;
+            } else {
+                return RELU_LEAKY_LEAKAGE;
+            }}
+    };
+    
+    /**
+     * Names.
+     */
+    private static final String[] names = {
+        "Identity",
+        "Hyperbolic tangent",
+        "Sigmoid",
+        "Rectified linear unit",
+        "SoftPlus",
+        "Leaky rectified linear unit"
+    };
+    
+    
+    
+    /**
+     * Returns the function as DoubleUnaryOperator.
+     * 
+     * @return function as DoubleUnaryOperator;
+     */
+    public DoubleUnaryOperator get() {
+        return foos[ordinal()];
+    }
+    
+    /**
+     * Returns the derivative as DoubleUnaryOperator.
+     * 
+     * @return derivative as DoubleUnaryOperator;
+     */
+    public DoubleUnaryOperator getPrime() {
+        return primes[ordinal()];
+    }
+    
+    
+    
+    @Override
+    public String toString() {
+        return names[ordinal()];
+    }
 }

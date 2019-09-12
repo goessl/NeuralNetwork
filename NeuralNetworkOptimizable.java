@@ -42,69 +42,69 @@ import optimization.Optimizable;
  * arrays to the weight matricies.
  * 
  * @author Sebastian Gössl
- * @version 1.0 3.3.2019
+ * @version 1.1 12.9.2019
  */
 public class NeuralNetworkOptimizable implements Optimizable<double[]> {
-  
-  /**
-   * NeuralNetwork to wrap.
-   */
-  private final NeuralNetwork net;
-  
-  
-  
-  /**
-   * Constructs a new NeuralNetworkOptimizable with the given NeuralNetwork.
-   * 
-   * @param net NeuralNetwork to wrap
-   */
-  public NeuralNetworkOptimizable(NeuralNetwork net) {
-    this.net = net;
-  }
-  
-  
-  
-  /**
-   * Unwraps the elements of a matrix array to a primitive double array.
-   * 
-   * @param matricies matricies to be unwrapped
-   * @return elements of the matricies in an primitive double array
-   */
-  private double[] matriciesToArray(Matrix[] matricies) {
-    final List<Double> list = new ArrayList<>();
-    for(Matrix matrix : matricies) {
-      matrix.forEach((Consumer<Double>)list::add);
+    
+    /**
+     * NeuralNetwork to wrap.
+     */
+    private final NeuralNetwork net;
+    
+    
+    
+    /**
+     * Constructs a new NeuralNetworkOptimizable with the given NeuralNetwork.
+     * 
+     * @param net NeuralNetwork to wrap
+     */
+    public NeuralNetworkOptimizable(NeuralNetwork net) {
+        this.net = net;
     }
     
-    return list.stream().mapToDouble(Double::doubleValue).toArray();
-  }
-  
-  
-  
-  @Override
-  public double[] getParameters() {
-    return matriciesToArray(net.getWeights());
-  }
-  
-  @Override
-  public void setParameters(double[] params) {
-    final PrimitiveIterator.OfDouble iterator =
-            Arrays.stream(params).iterator();
     
-    for(Matrix weight : net.getWeights()) {
-      weight.set(() -> (iterator.nextDouble()));
+    
+    /**
+     * Unwraps the elements of a matrix array to a primitive double array.
+     * 
+     * @param matricies matricies to be unwrapped
+     * @return elements of the matricies in an primitive double array
+     */
+    private double[] matriciesToArray(Matrix[] matricies) {
+        final List<Double> list = new ArrayList<>();
+        for(Matrix matrix : matricies) {
+            matrix.forEach((Consumer<Double>)list::add);
+        }
+        
+        return list.stream().mapToDouble(Double::doubleValue).toArray();
     }
-  }
-  
-  
-  @Override
-  public double cost(double[][] input, double[][] output) {
-    return net.cost(new Matrix(input), new Matrix(output));
-  }
-  
-  @Override
-  public double[] costPrime(double[][] input, double[][] output) {
-    return matriciesToArray(
-            net.costPrime(new Matrix(input), new Matrix(output)));
-  }
+    
+    
+    
+    @Override
+    public double[] getParameters() {
+        return matriciesToArray(net.getWeights());
+    }
+    
+    @Override
+    public void setParameters(double[] params) {
+        final PrimitiveIterator.OfDouble iterator =
+                Arrays.stream(params).iterator();
+        
+        for(Matrix weight : net.getWeights()) {
+            weight.set(() -> (iterator.nextDouble()));
+        }
+    }
+    
+    
+    @Override
+    public double cost(double[][] input, double[][] output) {
+        return net.cost(new Matrix(input), new Matrix(output));
+    }
+    
+    @Override
+    public double[] costPrime(double[][] input, double[][] output) {
+        return matriciesToArray(
+                net.costPrime(new Matrix(input), new Matrix(output)));
+    }
 }
