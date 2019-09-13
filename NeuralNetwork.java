@@ -26,6 +26,7 @@
 
 package neuralnetwork;
 
+import java.util.Arrays;
 import matrix.Matrix;
 import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
@@ -55,7 +56,7 @@ import java.util.function.DoubleUnaryOperator;
  * layer[3] connects the node[2] of layer[2] with node[1] of layer[3])
  * 
  * @author Sebastian Gössl
- * @version 1.1 12.9.2019
+ * @version 1.2 13.9.2019
  */
 public class NeuralNetwork {
     
@@ -169,10 +170,7 @@ public class NeuralNetwork {
      */
     public Matrix[] getWeights() {
         final Matrix[] weights = new Matrix[layers.length];
-        
-        for(int i=0; i<weights.length; i++) {
-            weights[i] = layers[i].weights;
-        }
+        Arrays.setAll(weights, (i) -> layers[i].weights);
         
         return weights;
     }
@@ -220,6 +218,7 @@ public class NeuralNetwork {
     }
     
     
+    
     /**
      * Randomizes all weights based on the Xavier initialization algorithm.
      */
@@ -248,8 +247,7 @@ public class NeuralNetwork {
             final double average =
                     (layer.getNumberOfInputs() + layer.getNumberOfOutputs())
                     / 2;
-            layer.weights.set(() ->
-                    (rand.nextGaussian() / Math.sqrt(average)));
+            layer.weights.set(() -> rand.nextGaussian() / Math.sqrt(average));
         }
     }
     
@@ -421,6 +419,7 @@ public class NeuralNetwork {
         public int getNumberOfOutputs() {
             return weights.getWidth();
         }
+        
         
         
         /**

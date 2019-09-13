@@ -31,7 +31,6 @@ import matrix.Matrix;
 import java.util.Arrays;
 import java.util.List;
 import java.util.PrimitiveIterator;
-import java.util.function.Consumer;
 import optimization.Optimizable;
 
 
@@ -42,7 +41,7 @@ import optimization.Optimizable;
  * parameter arrays to the weight & bias matricies.
  * 
  * @author Sebastian Gössl
- * @version 1.1 12.9.2019
+ * @version 1.2 13.9.2019
  */
 public class NeuralNetworkWithBiasOptimizable
         implements Optimizable<double[]> {
@@ -74,7 +73,7 @@ public class NeuralNetworkWithBiasOptimizable
         for(int i=0; i<net.getNumberOfLayers(); i++) {
             matricies[2*i] = net.getWeights(i);
             matricies[2*i + 1] = net.getBiases(i);
-      } 
+        }
     }
     
     
@@ -88,7 +87,7 @@ public class NeuralNetworkWithBiasOptimizable
     private double[] matriciesToArray(Matrix[] matricies) {
         final List<Double> list = new ArrayList<>();
         for(Matrix matrix : matricies) {
-            matrix.forEach((Consumer<Double>)list::add);
+            matrix.forEach(list::add);
         }
         
         return list.stream().mapToDouble(Double::doubleValue).toArray();
@@ -107,7 +106,7 @@ public class NeuralNetworkWithBiasOptimizable
                 Arrays.stream(params).iterator();
         
         for(Matrix matrix : matricies) {
-            matrix.set(() -> (iterator.nextDouble()));
+            matrix.set(() -> iterator.nextDouble());
         }
     }
     

@@ -34,7 +34,7 @@ import java.util.function.DoubleUnaryOperator;
  * Common activation functions & their derivatives used in neural networks.
  * 
  * @author Sebastian Gössl
- * @version 1.1 12.9.2019
+ * @version 1.2 13.9.2019
  */
 public enum ActivationFunction {
     
@@ -46,9 +46,10 @@ public enum ActivationFunction {
     
     
     /**
-     * Leaky ReLU leakage
+     * Leaky ReLU leakage.
      */
     private static final double RELU_LEAKY_LEAKAGE = 0.01;
+    
     
     
     /**
@@ -56,20 +57,20 @@ public enum ActivationFunction {
      */
     private static DoubleUnaryOperator[] foos = new DoubleUnaryOperator[] {
         //Identity
-        (x) -> (x),
+        (x) -> x,
         //Tanh
-        (x) -> (Math.tanh(x)),
+        (x) -> Math.tanh(x),
         //Sigmoid
-        (x) -> (1 / (1 + Math.exp(-x))),
+        (x) -> 1 / (1 + Math.exp(-x)),
         //ReLU
         (x) -> {
             if(x >= 0) {
                 return x;
             } else {
-                return 0.0;
+                return 0;
             }},
         //SoftPlus
-        (x) -> (Math.log(1 + Math.exp(x))),
+        (x) -> Math.log(1 + Math.exp(x)),
         //Leaky ReLU
         (x) -> {
             if(x >= 0) {
@@ -84,24 +85,24 @@ public enum ActivationFunction {
      */
     private static DoubleUnaryOperator[] primes = new DoubleUnaryOperator[] {
         //Identity
-        (x) -> (1),
+        (x) -> 1,
         //Tanh
-        (x) -> (1 - Math.tanh(x) * Math.tanh(x)),
+        (x) -> 1 - Math.tanh(x) * Math.tanh(x),
         //Sigmoid
-        (x) -> (Math.exp(-x) / ((1 + Math.exp(-x)) * (1 + Math.exp(-x)))),
+        (x) -> Math.exp(-x) / ((1 + Math.exp(-x)) * (1 + Math.exp(-x))),
         //ReLU
         (x) -> {
             if(x >= 0) {
-                return 1.0;
+                return 1;
             } else {
-                return 0.0;
+                return 0;
             }},
         //Softplus
-        (x) -> (1 / (1 + Math.exp(-x))),
+        (x) -> 1 / (1 + Math.exp(-x)),
         //Leaky ReLU
         (x) -> {
             if(x >= 0) {
-                return  1.0;
+                return 1;
             } else {
                 return RELU_LEAKY_LEAKAGE;
             }}
@@ -124,7 +125,7 @@ public enum ActivationFunction {
     /**
      * Returns the function as DoubleUnaryOperator.
      * 
-     * @return function as DoubleUnaryOperator;
+     * @return function as DoubleUnaryOperator
      */
     public DoubleUnaryOperator get() {
         return foos[ordinal()];
@@ -133,7 +134,7 @@ public enum ActivationFunction {
     /**
      * Returns the derivative as DoubleUnaryOperator.
      * 
-     * @return derivative as DoubleUnaryOperator;
+     * @return derivative as DoubleUnaryOperator
      */
     public DoubleUnaryOperator getPrime() {
         return primes[ordinal()];

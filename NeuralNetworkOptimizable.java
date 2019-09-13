@@ -31,7 +31,6 @@ import matrix.Matrix;
 import java.util.Arrays;
 import java.util.List;
 import java.util.PrimitiveIterator;
-import java.util.function.Consumer;
 import optimization.Optimizable;
 
 
@@ -42,7 +41,7 @@ import optimization.Optimizable;
  * arrays to the weight matricies.
  * 
  * @author Sebastian Gössl
- * @version 1.1 12.9.2019
+ * @version 1.2 13.9.2019
  */
 public class NeuralNetworkOptimizable implements Optimizable<double[]> {
     
@@ -73,7 +72,7 @@ public class NeuralNetworkOptimizable implements Optimizable<double[]> {
     private double[] matriciesToArray(Matrix[] matricies) {
         final List<Double> list = new ArrayList<>();
         for(Matrix matrix : matricies) {
-            matrix.forEach((Consumer<Double>)list::add);
+            matrix.forEach(list::add);
         }
         
         return list.stream().mapToDouble(Double::doubleValue).toArray();
@@ -92,7 +91,7 @@ public class NeuralNetworkOptimizable implements Optimizable<double[]> {
                 Arrays.stream(params).iterator();
         
         for(Matrix weight : net.getWeights()) {
-            weight.set(() -> (iterator.nextDouble()));
+            weight.set(() -> iterator.nextDouble());
         }
     }
     

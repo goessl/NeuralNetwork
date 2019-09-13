@@ -26,6 +26,7 @@
 
 package neuralnetwork;
 
+import java.util.Arrays;
 import matrix.Matrix;
 import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
@@ -58,7 +59,7 @@ import java.util.function.DoubleUnaryOperator;
  * for one node.
  * 
  * @author Sebastian Gössl
- * @version 1.1 12.9.2019
+ * @version 1.2 13.9.2019
  */
 public class NeuralNetworkWithBias {
     
@@ -174,10 +175,7 @@ public class NeuralNetworkWithBias {
      */
     public Matrix[] getWeights() {
         final Matrix[] weights = new Matrix[layers.length];
-        
-        for(int i=0; i<weights.length; i++) {
-            weights[i] = layers[i].weights;
-        }
+        Arrays.setAll(weights, (i) -> layers[i].weights);
         
         return weights;
     }
@@ -220,10 +218,7 @@ public class NeuralNetworkWithBias {
      */
     public Matrix[] getBiases() {
         final Matrix[] biases = new Matrix[layers.length];
-        
-        for(int i=0; i<biases.length; i++) {
-            biases[i] = layers[i].biases;
-        }
+        Arrays.setAll(biases, (i) -> layers[i].biases);
         
         return biases;
     }
@@ -271,6 +266,7 @@ public class NeuralNetworkWithBias {
     }
     
     
+    
     /**
      * Randomizes all weights based on the Xavier initialization algorithm.
      */
@@ -299,9 +295,8 @@ public class NeuralNetworkWithBias {
             final double average =
                     (layer.getNumberOfInputs() + layer.getNumberOfOutputs())
                     / 2;
-            layer.weights.set(() ->
-                    (rand.nextGaussian() / Math.sqrt(average)));
-            layer.biases.set(() -> (rand.nextGaussian()));
+            layer.weights.set(() -> rand.nextGaussian() / Math.sqrt(average));
+            layer.biases.set(() -> rand.nextGaussian());
         }
     }
     
@@ -483,6 +478,7 @@ public class NeuralNetworkWithBias {
         }
         
         
+        
         /**
          * Forward propagates the given input through the layer and returns the
          * result.
@@ -492,7 +488,7 @@ public class NeuralNetworkWithBias {
          */
         public Matrix forward(Matrix input) {
             z = input.multiply(weights).applyNewDifSize(biases,
-                    (x, y) -> (x + y));
+                    (x, y) -> x + y);
             a = z.applyNew(activationFunction);
             
             return a;
