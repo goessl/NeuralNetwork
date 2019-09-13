@@ -5,8 +5,8 @@ learning.
 In this repository you can find two neural network classes,
 [one without](NeuralNetwork.java) &
 [one with biases](NeuralNetworkWithBias.java). Both work mostly the same and
-support the same methods so they will referred to as *the neural network*. I
-recommend using the bias version for better results.
+support the same methods so they will referred to as *the neural network*.
+I recommend using the bias version for better results.
 
 The neural network class is only used for construction, forward & backward
 propagation! To train the network
@@ -19,7 +19,7 @@ parameters. These include the number of inputs, the number of nodes in every
 layer and the activation functions of every layer & their derivatives.
 Common activation functions & their derivatives are already implemented in
 [ActivationFunction](ActivationFunction.java).
-Now you can alread forward datasets through the network & back propagate.
+Now you can already forward datasets through the network & do back propagation.
 
 Input and output is stored in matricies in which every row represents an
 dataset and every column gets feed into an node (e.g. element[1][2] is a

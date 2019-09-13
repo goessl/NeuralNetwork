@@ -30,6 +30,7 @@ import java.util.Arrays;
 import matrix.Matrix;
 import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
+import java.util.function.UnaryOperator;
 
 
 
@@ -56,9 +57,9 @@ import java.util.function.DoubleUnaryOperator;
  * layer[3] connects the node[2] of layer[2] with node[1] of layer[3])
  * 
  * @author Sebastian Gössl
- * @version 1.2 13.9.2019
+ * @version 1.3 13.9.2019
  */
-public class NeuralNetwork {
+public class NeuralNetwork implements UnaryOperator<Matrix> {
     
     /**
      * Layers of the network.
@@ -73,20 +74,10 @@ public class NeuralNetwork {
      * @param other network to copy
      */
     public NeuralNetwork(NeuralNetwork other) {
-        layers = new Layer[other.getNumberOfLayers()];
-        
-        layers[0] = new Layer(other.getNumberOfInputs(), other.getLayerSize(0),
-                other.getActivationFunction(0),
-                other.getActivationFunctionPrime(0));
-        setWeights(0, other.getWeights(0));
-        
-        for(int i=1; i<layers.length; i++) {
-            layers[i] = new Layer(
-                    other.getLayerSize(i-1), other.getLayerSize(i),
-                    other.getActivationFunction(i),
-                    other.getActivationFunctionPrime(i));
-            setWeights(i, other.getWeights(i));
-        }
+        this(other.getNumberOfInputs(), other.getLayerSizes(),
+                other.getActivationFunctions(),
+                other.getActivationFunctionPrimes());
+        setWeights(other.getWeights());
     }
     
     /**
@@ -154,23 +145,35 @@ public class NeuralNetwork {
     }
     
     /**
+     * Returns all layer sizes as an array.
+     * 
+     * @return all layer sizes as an array
+     */
+    public int[] getLayerSizes() {
+        final int[] layerSizes = new int[getNumberOfLayers()];
+        Arrays.setAll(layerSizes, (i) -> getLayerSize(i));
+        
+        return layerSizes;
+    }
+    
+    /**
      * Returns the weights of the specified layer.
      * 
      * @param layer index of the layer
      * @return weights of the specified layer
      */
     public Matrix getWeights(int layer) {
-        return layers[layer].weights;
+        return layers[layer].getWeights();
     }
     
     /**
-     * Returns all weights in an array.
+     * Returns all weights as an array.
      * 
-     * @return all weights in an array
+     * @return all weights as an array
      */
     public Matrix[] getWeights() {
-        final Matrix[] weights = new Matrix[layers.length];
-        Arrays.setAll(weights, (i) -> layers[i].weights);
+        final Matrix[] weights = new Matrix[getNumberOfLayers()];
+        Arrays.setAll(weights, (i) -> getWeights(i));
         
         return weights;
     }
@@ -182,7 +185,7 @@ public class NeuralNetwork {
      * @param weights weights to replace the current weights with
      */
     public void setWeights(int layer, Matrix weights) {
-        layers[layer].weights = weights;
+        layers[layer].setWeights(weights);
     }
     
     /**
@@ -191,8 +194,8 @@ public class NeuralNetwork {
      * @param weights weights to replace the current weights with
      */
     public void setWeights(Matrix[] weights) {
-        for(int i=0; i<layers.length; i++) {
-            layers[i].weights = weights[i];
+        for(int i=0; i<getNumberOfLayers(); i++) {
+            setWeights(i, weights[i]);
         }
     }
     
@@ -203,7 +206,20 @@ public class NeuralNetwork {
      * @return activation function of the specified layer
      */
     public DoubleUnaryOperator getActivationFunction(int layer) {
-        return layers[layer].activationFunction;
+        return layers[layer].getActivationFunction();
+    }
+    
+    /**
+     * Returns all activation functions as an array.
+     * 
+     * @return all activation functions as an array
+     */
+    public DoubleUnaryOperator[] getActivationFunctions() {
+        final DoubleUnaryOperator[] activationFunctions =
+                new DoubleUnaryOperator[getNumberOfLayers()];
+        Arrays.setAll(activationFunctions, (i) -> getActivationFunction(i));
+        
+        return activationFunctions;
     }
     
     /**
@@ -214,7 +230,21 @@ public class NeuralNetwork {
      * @return derivative of the activation function of the specified layer
      */
     public DoubleUnaryOperator getActivationFunctionPrime(int layer) {
-        return layers[layer].activationFunctionPrime;
+        return layers[layer].getActivationFunctionPrime();
+    }
+    
+    /**
+     * Returns all activation function derivatives as an array.
+     * 
+     * @return all activation function derivatives as an array
+     */
+    public DoubleUnaryOperator[] getActivationFunctionPrimes() {
+        final DoubleUnaryOperator[] activationFunctionPrimes =
+                new DoubleUnaryOperator[getNumberOfLayers()];
+        Arrays.setAll(activationFunctionPrimes,
+                (i) -> getActivationFunctionPrime(i));
+        
+        return activationFunctionPrimes;
     }
     
     
@@ -247,7 +277,8 @@ public class NeuralNetwork {
             final double average =
                     (layer.getNumberOfInputs() + layer.getNumberOfOutputs())
                     / 2;
-            layer.weights.set(() -> rand.nextGaussian() / Math.sqrt(average));
+            layer.getWeights().set(
+                    () -> rand.nextGaussian() / Math.sqrt(average));
         }
     }
     
@@ -270,16 +301,12 @@ public class NeuralNetwork {
      */
     public void keepWeightsInBounds(double minimum, double maximum) {
         for(Layer layer : layers) {
-            layer.weights.apply((x) -> {
+            layer.getWeights().apply((x) -> {
+                
                 if(Double.isNaN(x)) {
                     return (minimum + maximum) / 2;
-                } else if(x < minimum) {
-                    return minimum;
-                } else if(x > maximum) {
-                    return maximum;
                 }
-                
-                return x;
+                return Math.min(Math.max(x, minimum), maximum);
             });
         }
     }
@@ -289,14 +316,15 @@ public class NeuralNetwork {
      * Forward propagates the given input through the neural network and
      * returns the result.
      * 
-     * @param input input to propagate through the network
+     * @param t input to propagate through the network
      * @return output of the network
      */
-    public Matrix forward(Matrix input) {
-        Matrix a = input;
+    @Override
+    public Matrix apply(Matrix t) {
+        Matrix a = t;
         
         for(Layer layer : layers) {
-            a = layer.forward(a);
+            a = layer.apply(a);
         }
         
         return a;
@@ -312,7 +340,7 @@ public class NeuralNetwork {
      * @return mean squared error of the networks output and the given output
      */
     public double cost(Matrix input, Matrix output) {
-        final Matrix difference = output.subtract(forward(input));
+        final Matrix difference = output.subtract(apply(input));
         final Matrix squaredDifference =
                 difference.multiplyElementwise(difference);
         
@@ -334,7 +362,7 @@ public class NeuralNetwork {
      * @return derivative of the cost with respect to every weight
      */
     public Matrix[] costPrime(Matrix input, Matrix output) {
-        final Matrix yHat = forward(input);
+        final Matrix yHat = apply(input);
         final Matrix[] dJdW = new Matrix[layers.length];
         
         
@@ -362,7 +390,8 @@ public class NeuralNetwork {
      * It consists of its nodes (neurons) and the weights (synapses) leading to
      * it from the previous layer.
      */
-    private class Layer {
+    private class Layer implements UnaryOperator<Matrix> {
+        
         /**
          * Activation function and its derivative.
          */
@@ -382,6 +411,18 @@ public class NeuralNetwork {
         
         
         /**
+         * Constructs a copy of the given layer
+         * 
+         * @param other layer to copy
+         */
+        public Layer(Layer other) {
+            this(other.getNumberOfInputs(), other.getNumberOfOutputs(),
+                    other.getActivationFunction(),
+                    other.getActivationFunctionPrime());
+            setWeights(other.getWeights());
+        }
+        
+        /**
          * Constructs a new layer on a neural network.
          * 
          * @param inputs number of nodes of the previous layer
@@ -393,6 +434,7 @@ public class NeuralNetwork {
         public Layer(int inputs, int outputs,
                 DoubleUnaryOperator activationFunction,
                 DoubleUnaryOperator activationFunctionPrime) {
+            
             this.activationFunction = activationFunction;
             this.activationFunctionPrime = activationFunctionPrime;
             
@@ -420,17 +462,59 @@ public class NeuralNetwork {
             return weights.getWidth();
         }
         
+        /**
+         * Returns the weights.
+         * 
+         * @return weights
+         */
+        public Matrix getWeights() {
+            return weights;
+        }
+        
+        /**
+         * Returns the activation function.
+         * 
+         * @return activation function
+         */
+        public DoubleUnaryOperator getActivationFunction() {
+            return activationFunction;
+        }
+        
+        /**
+         * Returns the derivative of the activation function.
+         * 
+         * @return derivative of the activation function
+         */
+        public DoubleUnaryOperator getActivationFunctionPrime() {
+            return activationFunctionPrime;
+        }
+        
+        /**
+         * Sets the weights to the given weights.
+         * 
+         * @param weights new weights
+         */
+        public void setWeights(Matrix weights) {
+            if(this.weights.getHeight() != weights.getHeight()
+                    || this.weights.getWidth() != weights.getWidth()) {
+                throw new IllegalArgumentException("Wrong weights dimensions");
+            }
+            
+            this.weights = weights;
+        }
+        
         
         
         /**
          * Forward propagates the given input through the layer and returns the
          * result.
          * 
-         * @param input input to forward propagate through the layer
+         * @param t input to forward propagate through the layer
          * @return output of the layer
          */
-        public Matrix forward(Matrix input) {
-            z = input.multiply(weights);
+        @Override
+        public Matrix apply(Matrix t) {
+            z = t.multiply(weights);
             a = z.applyNew(activationFunction);
             
             return a;
